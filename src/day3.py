@@ -4,13 +4,22 @@ from typing import List
 
 
 
+
+
 def parse_data(data: str) -> List[List[int]]:
-    look_for = r"mul\((\d{1,3}),(\d{1,3})\)"
-    return [
-        [int(match.group(1)), int(match.group(2))] 
-        for match 
-        in re.finditer(look_for, data)
-    ]
+    look_for = r"(do\(\)|don't\(\)|mul\((\d{1,3}),(\d{1,3})\))"
+    is_enabled = True
+    instructions = []
+
+    for match in re.finditer(look_for, data):
+        if match.group(1).startswith("mul") and is_enabled:
+            instructions.append((int(match.group(2)), int(match.group(3))))
+        elif match.group(1) == "do()":
+            is_enabled = True
+        elif match.group(1) == "don't()":
+            is_enabled = False
+
+    return instructions
 
 def multiply_elements(elements: List[List[int]]) -> List[int]:
     return [
