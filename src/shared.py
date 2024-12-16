@@ -13,4 +13,4 @@ def read_all(filename: str) -> str:
 
 def read_all_lines(filename: str) -> List[str]:
     with open(filename) as data:
-        return data.readlines()
+        return [line.strip() for line in data.readlines()]
