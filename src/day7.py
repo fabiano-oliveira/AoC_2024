@@ -7,20 +7,30 @@ Equation = namedtuple("Equation", ["result", "components", "operations"])
 generated_operations_cache = {}
 
 def parse_equation(line: str) -> Equation:
+    """
+    Parse an equation from a line of text and fill in the operations.
+    """
     result, components = line.split(":")
     components = components.strip().split(" ")
     return fill_operations(Equation(int(result), [int(component) for component in components], []))
 
 def parse_equations(data: List[str]) -> List[Equation]:
+    """
+    Parse a list of equations from a list of lines.
+    """
     return [parse_equation(line) for line in data]  
 
 def generate_operations(how_many: int) -> List[str]:
+    """
+    Generate all possible operations for a given number of components.
+    """
+
     # check the cache before generating operations
     if how_many in generated_operations_cache:
         return generated_operations_cache[how_many]
 
     # generate operations
-    operations = ["+", "*"]
+    operations = ["+", "*", "||"]
     result = [[op] for op in operations]
 
     for i in range(how_many - 1):
@@ -34,22 +44,33 @@ def generate_operations(how_many: int) -> List[str]:
     return result
 
 def calculate(accumulated: int, operation: str, next_value: int) -> int:
+    """
+    Calculate the result of an operation.
+    """
     if operation == "+":
         return accumulated + next_value
     elif operation == "*":
         return accumulated * next_value
+    elif operation == "||":
+        return int(str(accumulated) + str(next_value))
 
 def fill_operations(equation: Equation) -> Equation:
-    operations_available = generate_operations(len(equation.components) - 1)
+    """
+    Fill in the operations for an equation.
+    """
+    operations_available = list(reversed(generate_operations(len(equation.components) - 1)))
     equation.operations.clear()
 
     for operation_set in operations_available:
         total = equation.components[0]
         for index in range(len(operation_set)):
             total = calculate(total, operation_set[index], equation.components[index + 1])
+            if total > equation.result:
+                break
 
         if total == equation.result:
             equation.operations.append(operation_set)
+            break
 
     return equation
 
