@@ -6,7 +6,7 @@ def test_parse_equation():
     equation = parse_equation("190: 10 19")
     assert equation.result == 190
     assert equation.components == [10, 19]
-    assert equation.operations == []
+    assert equation.operations == [['*']]
 
 @pytest.mark.parametrize(
     "how_many,expected",

@@ -1,10 +1,10 @@
-from .shared import read_all_lines
+from shared import read_all_lines
 from typing import List, Tuple, Dict
 from collections import namedtuple
 
 
 Equation = namedtuple("Equation", ["result", "components", "operations"])
-
+generated_operations_cache = {}
 
 def parse_equation(line: str) -> Equation:
     result, components = line.split(":")
@@ -15,14 +15,21 @@ def parse_equations(data: List[str]) -> List[Equation]:
     return [parse_equation(line) for line in data]  
 
 def generate_operations(how_many: int) -> List[str]:
+    # check the cache before generating operations
+    if how_many in generated_operations_cache:
+        return generated_operations_cache[how_many]
+
+    # generate operations
     operations = ["+", "*"]
     result = [[op] for op in operations]
 
-    while how_many > 1:
-        how_many -= 1
+    for i in range(how_many - 1):
         result = [
             item + [op] for item in result for op in operations
-        ]    
+        ]
+
+    # cache the result
+    generated_operations_cache[how_many] = result
 
     return result
 
@@ -34,6 +41,7 @@ def calculate(accumulated: int, operation: str, next_value: int) -> int:
 
 def fill_operations(equation: Equation) -> Equation:
     operations_available = generate_operations(len(equation.components) - 1)
+    equation.operations.clear()
 
     for operation_set in operations_available:
         total = equation.components[0]
